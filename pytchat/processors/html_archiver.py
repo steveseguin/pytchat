@@ -8,6 +8,7 @@ from .chat_processor import ChatProcessor
 from .default.processor import DefaultProcessor
 from ..exceptions import UnknownConnectionError
 import tempfile
+from html import escape
 
 PATTERN = re.compile(r"(.*)\(([0-9]+)\)$")
 
@@ -90,13 +91,13 @@ class HTMLArchiver(ChatProcessor):
         for c in self.processor.process(chat_components).items:
             self.tmp_fp.write(
                 self._parse_html_line((
-                    c.datetime,
-                    c.elapsedTime,
-                    c.author.name,
+                    escape(c.datetime),
+                    escape(c.elapsedTime),
+                    escape(c.author.name),
                     self._parse_message(c.messageEx),
-                    c.amountString,
-                    c.author.type,
-                    c.author.channelId)
+                    escape(c.amountString),
+                    escape(c.author.type),
+                    escape(c.author.channelId))
                 )
             )
             if self.callback:
@@ -115,8 +116,8 @@ class HTMLArchiver(ChatProcessor):
                         '</tr></thead>\n'))
         
     def _parse_message(self, message_items: list) -> str:
-        return ''.join(''.join(('<span class="', self._set_emoji_table(item), '" title="', item['txt'], '"></span>'))
-                       if type(item) is dict else item
+        return ''.join(''.join(('<span class="', escape(self._set_emoji_table(item)), '" title="', escape(item['txt']), '"></span>'))
+                       if type(item) is dict else escape(item)
                        for item in message_items)
 
     def _encode_img(self, url):
